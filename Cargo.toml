@@ -1,0 +1,6 @@
+[package]
+name = "explore"
+version = "0.1.0"
+authors = ["Lucas Dohmen <lucas@dohmen.io>"]
+
+[dependencies]
