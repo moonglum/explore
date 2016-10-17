@@ -1,7 +1,11 @@
+extern crate chrono;
 use std::io;
 use std::fs::{self, DirEntry, FileType};
 use std::os::unix::fs::PermissionsExt;
 use std::os::unix::fs::FileTypeExt;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
+use chrono::{DateTime, TimeZone, Local};
 
 fn main() {
     match iterate_directory("./", &print_entry) {
@@ -26,8 +30,19 @@ fn print_entry(entry: &DirEntry) {
         Ok(file_name) => {
             match entry.metadata() {
                 Ok(metadata) => {
-                    println!("{}{} {}", convert_file_type(metadata.file_type()), convert_permissions(metadata.permissions().mode()), file_name)
-                    // println!("{} {}", file_name, metadata.permissions().mode())
+                    match metadata.modified() {
+                        Ok(modified) => {
+                            let datetime = system_time_to_date_time(modified);
+
+                            println!("{}{} {} {}", convert_file_type(
+                                metadata.file_type()),
+                                convert_permissions(metadata.permissions().mode()),
+                                datetime.format("%b %d %R"),
+                                file_name
+                            )
+                        },
+                        Err(_) => println!("An Error Occurred!"),
+                    }
                 },
                 Err(_) => println!("An Error Occurred!"),
             }
@@ -77,4 +92,20 @@ fn convert_permissions(numeric_notation: u32) -> String {
     string_notation.push(convert_permission_bit(numeric_notation, 8, 'x'));
 
     string_notation
+}
+
+fn system_time_to_date_time(t: SystemTime) -> DateTime<Local> {
+    let (sec, nsec) = match t.duration_since(UNIX_EPOCH) {
+        Ok(dur) => (dur.as_secs() as i64, dur.subsec_nanos()),
+        Err(e) => { // unlikely but should be handled
+            let dur = e.duration();
+            let (sec, nsec) = (dur.as_secs() as i64, dur.subsec_nanos());
+            if nsec == 0 {
+                (-sec, 0)
+            } else {
+                (-sec - 1, 1_000_000_000 - nsec)
+            }
+        },
+    };
+    Local.timestamp(sec, nsec)
 }
