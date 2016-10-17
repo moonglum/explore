@@ -9,7 +9,8 @@ pub struct Entry {
     pub file_type: FileType,
     pub permissions: u32,
     pub modified: SystemTime,
-    pub file_name: String
+    pub file_name: String,
+    pub size: u64
 }
 
 fn system_time_to_date_time(system_time: SystemTime) -> DateTime<Local> {
@@ -25,19 +26,22 @@ impl Entry {
         let file_name = entry.file_name().into_string().expect("File name could not be determined");
         let metadata = entry.metadata().expect("Meta Data could not be determined");
         let modified = metadata.modified().expect("Modified Date could not be determined");
+        let size = metadata.len();
 
         Entry {
             file_type: metadata.file_type(),
             permissions: metadata.permissions().mode(),
             modified: modified,
-            file_name: file_name
+            file_name: file_name,
+            size: size
         }
     }
 
     pub fn to_s(&self) -> String {
-        format!("{}{} {} {}",
+        format!("{}{} {:7} {} {}",
             self.file_type(),
             self.permissions(),
+            self.size,
             self.modified(),
             self.file_name
         )
