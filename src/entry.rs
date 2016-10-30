@@ -3,12 +3,13 @@ use std::os::unix::fs::{FileTypeExt};
 use std::time::{SystemTime, UNIX_EPOCH};
 use chrono::{DateTime, TimeZone, Local};
 use chrono::format::{DelayedFormat, StrftimeItems};
-use std::os::unix::fs::{PermissionsExt};
+use std::os::unix::fs::{MetadataExt, PermissionsExt};
 
 pub struct Entry {
     pub file_type: FileType,
     pub permissions: u32,
     pub modified: SystemTime,
+    pub nlink: u64,
     pub file_name: String,
     pub size: u64
 }
@@ -27,20 +28,23 @@ impl Entry {
         let metadata = entry.metadata().expect("Meta Data could not be determined");
         let modified = metadata.modified().expect("Modified Date could not be determined");
         let size = metadata.len();
+        let nlink = metadata.nlink();
 
         Entry {
             file_type: metadata.file_type(),
             permissions: metadata.permissions().mode(),
             modified: modified,
+            nlink: nlink,
             file_name: file_name,
             size: size
         }
     }
 
     pub fn to_s(&self) -> String {
-        format!("{}{} {:7} {} {}",
+        format!("{}{} {:3} {:7} {} {}",
             self.file_type(),
             self.permissions(),
+            self.nlink,
             self.size,
             self.modified(),
             self.file_name
