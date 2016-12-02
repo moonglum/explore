@@ -13,9 +13,9 @@ fn determine_target() -> String {
     let args: Vec<String> = env::args().collect();
 
     if args.len() == 1 {
-      format!("{}", "./")
+        format!("{}", "./")
     } else {
-      format!("{}", args[1])
+        format!("{}", args[1])
     }
 }
 

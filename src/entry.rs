@@ -1,5 +1,5 @@
 use std::fs::{DirEntry, FileType};
-use std::os::unix::fs::{FileTypeExt};
+use std::os::unix::fs::FileTypeExt;
 use std::time::{SystemTime, UNIX_EPOCH};
 use chrono::{DateTime, TimeZone, Local};
 use chrono::format::{DelayedFormat, StrftimeItems};
@@ -11,7 +11,7 @@ pub struct Entry {
     pub modified: SystemTime,
     pub nlink: u64,
     pub file_name: String,
-    pub size: u64
+    pub size: u64,
 }
 
 fn system_time_to_date_time(system_time: SystemTime) -> DateTime<Local> {
@@ -36,19 +36,18 @@ impl Entry {
             modified: modified,
             nlink: nlink,
             file_name: file_name,
-            size: size
+            size: size,
         }
     }
 
     pub fn to_s(&self) -> String {
         format!("{}{} {:3} {:7} {} {}",
-            self.file_type(),
-            self.permissions(),
-            self.nlink,
-            self.size,
-            self.modified(),
-            self.file_name
-        )
+                self.file_type(),
+                self.permissions(),
+                self.nlink,
+                self.size,
+                self.modified(),
+                self.file_name)
     }
 
     fn modified(&self) -> DelayedFormat<StrftimeItems> {
